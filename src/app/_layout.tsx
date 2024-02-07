@@ -22,7 +22,7 @@ const Layout = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-900 pt-8">
+    <SafeAreaView className="flex-1 bg-slate-900">
       <Slot />
     </SafeAreaView>
   );
