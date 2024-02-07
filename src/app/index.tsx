@@ -4,6 +4,7 @@ import { Header } from "@/components/header";
 import { View, Text, FlatList, SectionList } from "react-native";
 import { CATEGORIES, MENU } from "@/utils/data/products";
 import { Product } from "@/components/product";
+import { Link } from "expo-router";
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>(
@@ -29,7 +30,7 @@ const Home = () => {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 pt-8">
       <Header title="Faça seu pedido" amountOfItemsInTheCart={3} />
 
       <FlatList
@@ -55,7 +56,11 @@ const Home = () => {
         sections={MENU}
         keyExtractor={(item) => item.id}
         stickySectionHeadersEnabled={false}
-        renderItem={({ item }) => <Product data={item} />}
+        renderItem={({ item }) => (
+          <Link href={`/product/${item.id}`} asChild>
+            <Product data={item} />
+          </Link>
+        )}
         renderSectionHeader={({ section: { title } }) => (
           <Text className="text-white text-xl font-heading mt-8 mb-3">
             {title}
