@@ -4,25 +4,39 @@ import { useCartStore } from "@/stores/cart-store";
 import { PRODUCTS } from "@/utils/data/products";
 import { formatCurrency } from "@/utils/functions/format-currency";
 import { Feather } from "@expo/vector-icons";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, Redirect } from "expo-router";
 import { Image, View, Text } from "react-native";
 
+type ProductWithQuantity = {
+  id: string;
+  title: string;
+  price: number;
+  description: string;
+  cover: any;
+  thumbnail: any;
+  ingredients: string[];
+  quantity: number;
+};
+
 const Product: React.FC = () => {
-  const { addToCart, products } = useCartStore();
+  const { addToCart } = useCartStore();
   const { id } = useLocalSearchParams();
   const navigation = useNavigation();
 
-  const product = PRODUCTS.filter((item) => item.id === id)[0];
+  const product = PRODUCTS.find((item) => item.id === id);
 
   const handleAddToCart = () => {
     const productWithQuantity = {
       ...product,
       quantity: 1,
     };
-
-    addToCart(productWithQuantity);
+    addToCart(productWithQuantity as ProductWithQuantity);
     navigation.goBack();
   };
+
+  if (!product) {
+    return <Redirect href="/" />;
+  }
 
   return (
     <View className="flex-1">
@@ -33,6 +47,7 @@ const Product: React.FC = () => {
       />
 
       <View className="p-5 mt-8 flex-1">
+        <Text className="text-white font-heading text-xl">{product.title}</Text>
         <Text className="text-lime-400 text-2xl font-heading my-2">
           {formatCurrency(product.price)}
         </Text>
