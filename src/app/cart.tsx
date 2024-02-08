@@ -1,3 +1,4 @@
+import { View, Text, ScrollView, Alert, Linking } from "react-native";
 import { Button } from "@/components/button";
 import { Header } from "@/components/header";
 import { Input } from "@/components/input";
@@ -6,11 +7,19 @@ import { Product } from "@/components/product";
 import { TProductCartProps, useCartStore } from "@/stores/cart-store";
 import { formatCurrency } from "@/utils/functions/format-currency";
 import { Feather } from "@expo/vector-icons";
-import { View, Text, ScrollView, Alert } from "react-native";
+import { useNavigation } from "expo-router";
+import { useState } from "react";
+
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
+const PHONE_NUMBER = "5583998932212";
+
 const Cart: React.FC = () => {
-  const { products, removeFromCart } = useCartStore();
+  const [adress, setAdress] = useState<string>("");
+
+  const { products, removeFromCart, clearCart } = useCartStore();
+
+  const navigation = useNavigation();
 
   const total = formatCurrency(
     products.reduce(
@@ -34,6 +43,33 @@ const Cart: React.FC = () => {
         },
       ]
     );
+  };
+
+  const handleSendOrder = () => {
+    if (adress.trim().length === 0) {
+      return Alert.alert("Pedido", "Informe os dados da entrega.");
+    }
+
+    const cartProducts = products
+      .map((product) => `\n ${product.quantity} ${product.title}`)
+      .join("");
+
+    const message = `
+     🍔 NOVO PEDIDO 🍔
+
+      \n Entregar em: ${adress}
+
+      ${cartProducts}
+
+      \n Valor total: ${total}
+    `;
+
+    Linking.openURL(
+      `http://api.whatsapp.com/send?phone=${PHONE_NUMBER}&text=${message}`
+    );
+
+    clearCart();
+    navigation.goBack();
   };
 
   return (
@@ -70,13 +106,19 @@ const Cart: React.FC = () => {
               </Text>
             </View>
 
-            <Input placeholder="Informe o endereço de entrega com rua, bairro, CEP, número e complemento" />
+            <Input
+              placeholder="Informe o endereço de entrega com rua, bairro, CEP, número e complemento"
+              onChangeText={setAdress}
+              blurOnSubmit
+              onSubmitEditing={handleSendOrder}
+              returnKeyType="next"
+            />
           </View>
         </ScrollView>
       </KeyboardAwareScrollView>
 
       <View className="p-5 gap-5">
-        <Button>
+        <Button onPress={handleSendOrder}>
           <Button.Text>Enviar pedido</Button.Text>
           <Button.Icon>
             <Feather name="arrow-right-circle" size={20} />
